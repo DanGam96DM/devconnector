@@ -1,30 +1,30 @@
-import {Entity, PrimaryGeneratedColumn, Column, Unique, CreateDateColumn, UpdateDateColumn} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, Unique, CreateDateColumn, UpdateDateColumn, OneToMany} from "typeorm";
 import {MinLength, IsNotEmpty} from 'class-validator';
+import {Post} from './Post';
 @Entity()
-@Unique(['username'])
+@Unique(['email'])
 export class User {
 
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
-    @MinLength(6)
-    username:string;
+    name:string;
+
+    @Column()
+    email:string;
+
+    @Column()
+    avatar:string;
 
     @Column()
     @MinLength(6)
-    password:string
-
-    @Column()
-    @IsNotEmpty()
-    role: string;
+    password:string;
 
     @Column()
     @CreateDateColumn()
-    createdAt: Date;
+    date: Date;
 
-    @Column()
-    @UpdateDateColumn()
-    updatedAt:Date;
-
+    @OneToMany(type=>Post, post=>post.user)
+    posts:Post[];
 }

@@ -4,7 +4,7 @@ import user from './user';
 
 const routes=Router();
 
-routes.use('/auth', auth);
-routes.use('/users', user);
+routes.use('/api/auth', auth);
+routes.use('/api/users', user);
 
 export default routes;
