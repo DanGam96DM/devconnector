@@ -20,8 +20,5 @@ export class Social{
     @Column()
     instagram:string;
 
-    @OneToOne(type=>Profile)
-    @JoinColumn()
-    profile:Profile;
 }
 

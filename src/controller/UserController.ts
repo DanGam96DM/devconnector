@@ -2,90 +2,64 @@ import {getRepository} from "typeorm";
 import {Request, Response} from "express";
 import {User} from "../entity/User";
 import {validate} from 'class-validator';
+const gravatar = require('gravatar');
+const jwt=require('jsonwebtoken');
+const config=require('../config/default.json');
+const bcrypt=require('bcryptjs');
 
 export class UserController {
-    static getAll=async(req:Request, res:Response)=>{
-        const userRepository=getRepository(User);
-        try { 
-            const users=await userRepository.find();
-
-            if (users.length>0) {
-                res.send(users);
-            }else {
-                res.status(404).json({message: 'Sin resultados'});
-            }
-        } catch (error) {
-            return res.status(400).json({message: 'Error en el servidor'});
-        }
-    }
-    static getById=async(req:Request, res:Response)=>{
-        const {id}=req.params;
-        const userRepository=getRepository(User);
-        try {
-            const user=await userRepository.findOneOrFail(id);
-            res.send(user);
-        } catch (error) {
-            return res.status(404).json({message: 'Sin resultado'});
-        }
-    }
+    //@route POST api/users
+    //@desc Register user
+    //@access Public
     static newUser=async (req:Request, res:Response)=>{
-        const {username, password, role}=req.body;
+        const {name, email, password}=req.body;
         try {
-            const user=new User();
-            user.username=username;
-            user.password=password;
-            user.role=role;
+            const userRepository=getRepository(User);
+            const existingUser=await userRepository.findOne({email});
+            if (existingUser) {
+                return res.status(400).json({errors:[{msg: 'El usuario ya existe'}]});
+            }
+            //obtener el gravatar del usuario
+            const avatar=gravatar.url(email, {
+                s: '200',
+                r: 'pg',
+                d: 'mm'
+            });
 
-            //validar
+            //encriptar la contrase;a
+            const salt=await bcrypt.genSalt(10);
+            const encryptedPassword=await bcrypt.hash(password, salt);
+
+            let user=new User();
+            user.name=name;
+            user.email=email;
+            user.password=encryptedPassword;
+            user.avatar=avatar;
+
             const errors=await validate(user);
             if (errors.length>0) {
-                return res.status(400).json(errors);
+                return res.status(400).json({errors: errors})
+            } else {
+                await userRepository.save(user);
+
+                //retornar el jsonwebtoken
+                const payload={
+                    user:{
+                        id:user.id
+                    }
+                }
+                jwt.sign(payload, config.jwtToken,
+                    {expiresIn: 360000},
+                    (err, token)=>{
+                        if(err) throw err;
+                        res.json({token});
+                    }
+                );
             }
-            //guardar
-            const userRepository=getRepository(User);
-            await userRepository.save(user);
-            res.send('User Creado');
         } catch (error) {
-            return res.status(400).json({message: 'El usuario ya existe'});
+            console.error(error.message);
+            res.status(500).send('Error de servidor');
         }
-    }
-    static editUser=async(req:Request, res:Response)=>{
-        let user;
-        const {id}=req.params;
-        const {username, role}=req.body;
-        const userRepository=getRepository(User);
-        try {
-            user=await userRepository.findOneOrFail(id);
-            user.username=username;
-            user.role=role;
-        } catch (error) {
-            return res.status(404).json({message: 'Usuario no encontrado'});
-        }
-        const errors=await validate(user);
-        if (errors.length>0) {
-            return res.status(400).json(errors);
-        }
-
-        try {
-            await userRepository.save(user);
-        } catch (error) {
-           return res.status(409).json({message: 'Username ya existe'});
-        }
-        res.status(201).json({message:'Usuario actualizado'});
-    }
-    static deleteUser=async(req:Request, res:Response)=>{
-        const {id}=req.params;
-        const userRepository=getRepository(User);
-        let user:User;
-        try {
-            user=await userRepository.findOneOrFail(id);
-
-        } catch (error) {
-            return res.status(404).json({message:'Usuario no encontrado'});
-        }
-        //eliminar usuario
-        userRepository.delete(id);
-        res.status(201).json({message:'Usuario eliminado'});
     }
 }
 

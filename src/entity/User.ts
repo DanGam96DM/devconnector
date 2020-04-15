@@ -1,5 +1,5 @@
-import {Entity, PrimaryGeneratedColumn, Column, Unique, CreateDateColumn, UpdateDateColumn, OneToMany} from "typeorm";
-import {MinLength, IsNotEmpty} from 'class-validator';
+import {Entity, PrimaryGeneratedColumn, Column, Unique, CreateDateColumn, UpdateDateColumn, OneToMany, Exclusion} from "typeorm";
+import {MinLength, IsNotEmpty, IsEmail} from 'class-validator';
 import {Post} from './Post';
 @Entity()
 @Unique(['email'])
@@ -9,9 +9,12 @@ export class User {
     id: number;
 
     @Column()
+    @IsNotEmpty()
     name:string;
 
     @Column()
+    @IsEmail()
+    @IsNotEmpty()
     email:string;
 
     @Column()
@@ -19,6 +22,7 @@ export class User {
 
     @Column()
     @MinLength(6)
+    @IsNotEmpty()
     password:string;
 
     @Column()

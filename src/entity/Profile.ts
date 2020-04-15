@@ -2,6 +2,7 @@ import {Entity, PrimaryGeneratedColumn, Column, Unique, JoinColumn, OneToOne, Cr
 import {User} from './User';
 import {Experience} from './Experience';
 import {Education} from './Education';
+import {Social} from './Social';
 @Entity()
 
 export class Profile {
@@ -32,6 +33,10 @@ export class Profile {
     @OneToOne(type=>User)
     @JoinColumn()
     user:User;
+
+    @OneToOne(type=>Social)
+    @JoinColumn()
+    social:Social;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
     date:string
