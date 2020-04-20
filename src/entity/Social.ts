@@ -20,5 +20,10 @@ export class Social{
     @Column()
     instagram:string;
 
+    @OneToOne(type=>Profile, profile=>profile.social, {
+        onDelete: 'CASCADE'
+    })
+    @JoinColumn()
+    profile:Profile;
 }
 

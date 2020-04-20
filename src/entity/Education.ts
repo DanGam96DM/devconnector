@@ -24,14 +24,13 @@ export class Education{
     @IsNotEmpty()
     from:string;
 
-    @Column({type:'timestamp'})
+    @Column({type:'timestamp',nullable: true})
     to:string;
 
-    @Column({default:'0'})
-    @IsNotEmpty()
+    @Column({default:'0', nullable: true})
     current:boolean;
 
-    @Column()
+    @Column({nullable: true})
     description:string;
 
     @ManyToOne(type=>Profile, profile=>profile.educations)

@@ -38,7 +38,7 @@ export class UserController {
 
             const errors=await validate(user);
             if (errors.length>0) {
-                return res.status(400).json({errors: errors})
+                return res.status(400).json({errors: errors});
             } else {
                 await userRepository.save(user);
 

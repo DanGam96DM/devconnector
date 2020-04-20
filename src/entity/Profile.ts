@@ -18,24 +18,25 @@ export class Profile {
     @Column()
     location:string;
 
-    @Column('simple-array')
+    @Column('simple-array', {nullable: true})
     skills:string[];
 
     @Column()
     bio: string;
 
-    @Column()
+    @Column({nullable: true})
     status: string;
 
     @Column()
     githubusername:string;
 
-    @OneToOne(type=>User)
+    @OneToOne(type=>User, user=>user.profile, {
+        onDelete:'CASCADE'
+    })
     @JoinColumn()
     user:User;
 
-    @OneToOne(type=>Social)
-    @JoinColumn()
+    @OneToOne(type=>Social, social=>social.profile)
     social:Social;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})

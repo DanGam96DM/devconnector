@@ -16,21 +16,21 @@ export class Experience{
     @IsNotEmpty()
     company:string;
 
-    @Column()
+    @Column({nullable: true})
     location: string;
 
     @Column({type:'timestamp'})
     @IsNotEmpty()
     from:string;
 
-    @Column({type:'timestamp'})
+    @Column({type:'timestamp', nullable: true})
     to:string;
 
     @Column({default:'0'})
     @IsNotEmpty()
     current:boolean;
 
-    @Column()
+    @Column({nullable: true})
     description:string;
 
     @ManyToOne(type=>Profile, profile=>profile.experiences)
